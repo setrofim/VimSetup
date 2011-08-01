@@ -1,0 +1,13 @@
+#!/usr/bin/python
+
+fibs = []
+for i in xrange(1000000000000):
+    if i:
+        j = i
+    else:
+        j = 1
+        fibs.append(j)
+    i += 1
+    fibs.append(i)
+    
+

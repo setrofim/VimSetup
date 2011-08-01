@@ -1,0 +1,39 @@
+#include <iostream>
+#include <typeinfo>
+#include <vector>
+using namespace std;
+
+class TransactionUnit { public: virtual void reload() {/* ... */} };
+class IntegralUnit: public TransactionUnit { public: int a; };
+
+/* ... */
+
+void reset_unit(TransactionUnit* ptr_bc, bool integral=true)
+{
+    ptr_bc->reload();
+    if (integral) {
+	try {
+	    IntegralUnit *ptr_dc = dynamic_cast<IntegralUnit*>(ptr_bc);
+	    ptr_dc->a = 0;
+	}catch (bad_cast& my_ex) {cerr << "An error has occured:" << my_ex.what() << endl;}
+    }
+}
+
+/* ... */
+
+int main () {
+    vector<TransactionUnit*> transunits;
+    /* ... */
+    transunits.push_back(new IntegralUnit);
+    /* ... */
+    transunits.push_back(new TransactionUnit);
+    /* ... */
+    vector<TransactionUnit*>::iterator vit;
+    for(vit=transunits.begin(); vit < transunits.end(); vit++) {
+	reset_unit(*vit);
+	cout << "unit reset " << *vit << endl;
+    }
+    /* ... */
+    transunits.erase(transunits.begin(), transunits.end());
+    return 0;
+}

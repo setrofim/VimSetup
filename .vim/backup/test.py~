@@ -1,0 +1,27 @@
+    from operator import itemgetter, attrgetter
+    import operator
+
+
+
+
+    def sort(conf,out_result):
+       
+        list_sort=[]
+        values=conf['KEY']
+        for key in values:
+            field=key['field']
+            order=key['dir']
+           
+        if order=='DSCE':
+            dirc=True
+        else:
+            dirc=False
+
+
+        for item in out_result:
+            list_sort.append(item)   
+       
+        sorted_data=list_sort.sort(key=operator.itemgetter(field),reverse=dirc)
+       
+        yield sorted_data
+

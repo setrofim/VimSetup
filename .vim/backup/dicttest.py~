@@ -1,0 +1,7 @@
+#!/usr/bin/env python
+
+data2 = []
+for id, val in enumerate(['aa', 'bb', 'ccc']):
+    data2.append({'id':id, 'val':val})
+
+print data2

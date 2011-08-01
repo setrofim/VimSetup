@@ -1,0 +1,54 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Sat Jul 09 14:05:12 2011
+
+@author: jakob
+"""
+
+from squaredance import MessageBridge, Squaredance
+
+class Message(object):
+    __slots__ = ['target','msg']    
+    def __init__(self, string):
+        self.target, self.msg = string.split("!", 1)
+
+    def to_string(self):
+        return "%s!%s" % (self.target, self.msg)
+
+class Phone(object):
+    def __init__(self):
+        self.bridge = MessageBridge()
+        self.matcher = Squaredance()
+        self.inbound = []
+        self.outbound = []
+
+    def spin(self):
+        """Pull the inbound in, push the outbound out."""
+        for item in self.bridge.pull_messages():
+            self.inbound.append(Message(item))
+        for item in self.outbound:
+            self.bridge.queue_message(item)
+        self.outbound = []
+    
+    def number_expired(self, number):
+        self.matcher.queue(number)
+        loners = self.bridge.cleanup()
+        for user in loners:
+            #notify user they expired
+            pass      
+    
+    def process_inbound(self):
+        """Take every message thats inbound, ensure they are matched and 
+        not new to the service, ensure they have not expired, then forward 
+        the message back out on the outbound list"""
+        for message in self.inbound:
+            if (not self.bridge.is_new(message.number)) and (self.bridge.is_paired(message.number)): #catch anyone who is paired and is not new
+                number = self.bridge.forward(message.number) 
+                if number == message.number: #ttl sometimes expires and paired is not updated. we catch that here
+                    #number must have expired so we deal with that here
+                    self.number_expired(self, number)
+                else:
+                    message.number = number
+                    self.outbound.append(message)
+                    
+        

@@ -1,0 +1,32 @@
+#!/usr/bin/env python
+def fill(dim, length):
+    tofill = [[] for i in xrange(dim)]
+    for i in xrange(dim):
+         for j in range(length):
+             tofill[i].append(j ** i)
+    return tofill
+
+import copy
+def fill_orig(dim, length):
+    tofill = [[]] * dim
+    tofill = [copy.copy(mtlist) for mtlist in tofill]
+    for i in xrange(dim):
+         for j in range(length):
+             tofill[i].append(j ** i)
+    return tofill
+
+def creator(x, y):
+    """x is number, y is depth"""
+    a = list()
+    for i in xrange(x):
+        b = list()
+        for d in xrange(y):
+            b.append(list())
+        a.append(b)
+    return a
+
+print "fill_orig:", fill_orig(4, 3)
+
+print "fill:", fill(4, 3)
+
+print "creator:", creator(4,5)

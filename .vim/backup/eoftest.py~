@@ -1,0 +1,5 @@
+#!/usr/bin/env python
+import codecs
+text ='Hello, \x04\x1aWorld!'
+with codecs.open('eof-test.txt', 'wb', 'utf-8') as wfh:
+    wfh.write(text)

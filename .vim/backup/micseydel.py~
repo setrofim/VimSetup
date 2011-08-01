@@ -1,0 +1,37 @@
+#!/usr/bin/env python
+def check_bool_funcs(num_vars, *funcs):
+    # ord('A') == 65
+    print ' '.join(chr(x) for x in xrange(65, 65 + num_vars))
+
+    counters = [0] * num_vars # initialize the counters
+    while True:
+        for counter in counters:
+            print counter,
+        print
+
+        counters[-1] += 1
+
+        # start by incrementing the inner-most for loop counter
+        j = num_vars - 1
+        while counters[j] >= 2: # check that we haven't gone over
+            counters[j] = 0 # reset the counter
+            j -= 1 # increment the counter outer to the current one
+            if j < 0:
+                break
+            counters[j] += 1
+       
+        if j < 0:
+            break
+
+def check_bool_funcs2(num_vars, *funcs):
+    print ' '.join(chr(x) for x in xrange(65, 65 + num_vars))
+    count = 2 ** num_vars
+    fstr = '{0:0'+ num_vars + 'b}'
+    for i in xrange(count):
+        print ' '.join(list(fstr.format(i)))
+
+
+
+check_bool_funcs(5)
+print '######################'
+check_bool_funcs2(5)

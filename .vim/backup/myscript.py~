@@ -1,0 +1,11 @@
+#!/usr/bin/env python
+# myscript.py
+import package
+
+
+p = {'type':'functiona', 'conf':42}
+ptype = p['type']
+pconf = p['conf']
+
+getattr(mypackage, ptype)(pconf)
+

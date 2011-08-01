@@ -1,0 +1,53 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct ll_node {
+    struct ll_node *next;
+    int data;
+} ll_node;
+
+#define NEWNODE(n,v) do { n = (ll_node*)malloc(sizeof(ll_node)); \
+		     n->next=NULL; n->data=v; } while(0)
+
+#define PUSH(n,v) do { ll_node *cn = n; \
+		  while (cn->next != NULL) \
+		      cn = cn->next; \
+		  ll_node *an; \
+		  NEWNODE(an,v); \
+                  cn->next = an; } while(0)
+
+#define POP(n,rn) do { ll_node *cn = n, *cp; \
+	          while (cn->next != NULL) { \
+		      cp = cn; \
+		      cn = cn->next; \
+		  } \
+                  cp->next = NULL; \
+                  rn = cn; } while(0)
+
+int main()
+{
+    ll_node *thelist;
+    NEWNODE(thelist,42);
+
+    int i;
+    for (i=1; i<10; ++i)
+    {
+	PUSH(thelist, i);
+    }
+
+    printf("elt %x data is %d\n", (unsigned int)thelist, thelist->data);
+    ll_node *in = thelist;
+    while (in->next != NULL)
+    {
+	in = in->next;
+	printf("elt %x data is %d\n", (unsigned int)in, in->data);
+    }
+
+    ll_node *poped;
+    while (thelist->next != NULL)
+	POP(thelist, poped);
+    printf("last poped: %x, data is %d\n", (unsigned int)poped, poped->data);
+
+    return 0;
+}
+
