@@ -56,6 +56,8 @@ set listchars=tab:>-,trail:·,eol:$
 nmap <silent> <leader>s :set nolist!<CR>
 set shortmess=atI
 
+set autowrite
+
 au BufNewFile,BufRead *.flm,*.mk set filetype=make
 au BufNewFile,BufRead *.r set filetype=r
 au BufNewFile,BufRead *.pyf set filetype=python
