@@ -1,6 +1,0 @@
-#!/usr/bin/python
-a='Réglée sur zéro, ce qui signifie que le marqueur ↑.'
-print(a)
-with open(r'C:\Tmp\new.txt', 'w') as out_file:
-    out_file.write(a)
-
