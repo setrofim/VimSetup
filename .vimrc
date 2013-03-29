@@ -36,9 +36,8 @@ endfunction
 " Generic
 if has("gui_running")
 	colors wombat_custom
-else
-	set t_Co=256
-	colors wombat256mod
+	set lines=40 columns=130
+	set guioptions-=T
 endif
 syntax on
 filetype plugin indent on
@@ -47,8 +46,6 @@ set backupdir=$HOME/.vim-backup
 set directory=$HOME/.vim-backup
 
 set encoding=utf-8
-set lines=40 columns=130
-set guioptions-=T
 
 set hidden
 
