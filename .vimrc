@@ -33,22 +33,29 @@ endfunction
 """ setrofim's settings
 """ ---------------------
 
-" Generic
-if has("gui_running")
-	colors wombat_custom
-else
-	set t_Co=256
-	colors wombat256mod
-endif
+" Pathogen
+execute pathogen#infect()
+Helptags
+
 syntax on
 filetype plugin indent on
+
+" Generic
+if has("gui_running")
+	colorscheme wombat_custom
+	set lines=40 columns=130
+	set guioptions-=T
+	set guioptions-=m
+else
+	set t_Co=256
+	colorscheme lucius
+	hi Normal ctermbg=NONE
+endif
 
 set backupdir=$HOME/.vim-backup
 set directory=$HOME/.vim-backup
 
 set encoding=utf-8
-set lines=40 columns=130
-set guioptions-=T
 
 set hidden
 
@@ -119,18 +126,12 @@ nmap ]e :cn
 nmap [e :cp
 
 
-" Pathogen
-execute pathogen#infect()
-Helptags
-
-
 " Powerline
 if has("win32")
-
 	set guifont=Consolas\ for\ Powerline\ FixedD:h11
 else
 
-	set guifont=DejaVu\ Sans\ Mono\ for\ Powerline\ 10
+	set guifont=DejaVu\ Sans\ Mono\ for\ Powerline\ 9
 endif
 set laststatus=2
 let g:Powerline_symbols="fancy"
