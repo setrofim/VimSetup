@@ -47,9 +47,12 @@ if has("gui_running")
 	set guioptions-=T
 	set guioptions-=m
 else
-	set t_Co=256
+	if $TERM == "xterm-256color" || $TERM == "screen-256color" || $COLORTERM == "gnome-terminal"
+	  set t_Co=256
+	endif
 	colorscheme lucius
-	hi Normal ctermbg=NONE
+	LuciusBlack
+	hi Normal ctermbg=none
 endif
 syntax on
 filetype plugin indent on
@@ -94,11 +97,6 @@ cnoremap <Esc>b <S-Left>
 cnoremap <Esc>f <S-Right>
 cnoremap <Esc>d <S-right><Delete>
 cnoremap <C-g>  <C-c>
-
-if $TERM == "xterm-256color" || $TERM == "screen-256color" || $COLORTERM == "gnome-terminal"
-  set t_Co=256
-endif
-
 
 " Remap F1 as I keep hitting it by mistake
 inoremap <F1> <Esc>
@@ -248,3 +246,7 @@ function CheckScratch()
 endfunction
 
 autocmd VimEnter *  call CheckScratch()
+
+if !has("gui_running")
+	hi Normal ctermbg=none
+endif
