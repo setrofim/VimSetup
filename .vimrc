@@ -40,28 +40,10 @@ Helptags
 syntax on
 filetype plugin indent on
 
-" Generic
-if has("gui_running")
-	colorscheme wombat_custom
-	set lines=40 columns=130
-	set guioptions-=T
-	set guioptions-=m
-else
-	if $TERM == "xterm-256color" || $TERM == "screen-256color" || $COLORTERM == "gnome-terminal"
-	  set t_Co=256
-	endif
-	colorscheme lucius
-	LuciusBlack
-	hi Normal ctermbg=none
-endif
-syntax on
-filetype plugin indent on
-
 set backupdir=$HOME/.vim-backup
 set directory=$HOME/.vim-backup
 
 set encoding=utf-8
-set lines=40 columns=130
 set guioptions-=T
 
 set hidden
@@ -73,6 +55,10 @@ set smartcase
 " Moving across wrapped lines
 :nmap <Down> gj
 :nmap <Up> gk
+
+
+map <F9> :PyLint<CR>
+map <F12> :execute 'tselect' expand('<cword>')<CR>
 
 " Moving between windows
 " Need these to disable other C-j mappings
@@ -113,9 +99,9 @@ endfunction
 
 " File extentions
 au BufRead,BufNewFile *.xaml set filetype=xml
-au BufRead,BufNewFile *.rst set textwidth=100
+au BufRead,BufNewFile *.rst set textwidth=80
 au BufRead,BufNewFile *.html set syntax=htmljinja
-au BufRead,BufNewFile README* set filetype=rst textwidth=100
+au BufRead,BufNewFile README* set filetype=rst textwidth=80
 
 
 " Tab completion
@@ -136,13 +122,14 @@ Helptags
 " Powerline
 if has("win32")
 
-	set guifont=Consolas\ for\ Powerline\ FixedD:h11
+	set guifont=Consolas\ for\ Powerline\ FixedD:h10
 else
 
-	set guifont=DejaVu\ Sans\ Mono\ for\ Powerline\ 10
+	" set guifont=DejaVu\ Sans\ Mono\ 9
+	set guifont=Liberation\ Mono\ 9
 endif
 set laststatus=2
-let g:Powerline_symbols="fancy"
+"let g:Powerline_symbols="fancy"
 
 
 " FuzzyFinder
@@ -158,7 +145,6 @@ function FilterUserInput()
 	call obj.run()
 endfunction
 
-"nnoremap ,F :call FilteringNew().parseQuery(input('>'), '|').run()<CR>
 nnoremap ,F :call FilteringNew().addToParameter('alt', @/).run()<CR>
 nnoremap ,f :call FilterUserInput()<CR>
 nnoremap ,g :call FilteringGetForSource().return()<CR>
@@ -172,7 +158,8 @@ nmap <leader>xr :RopeRename<CR>
 
 " Ignore:
 " W391: Blank line at end of file
-let g:pymode_lint_ignore = "W391,E501"
+" W801: Redefinition of unused
+let g:pymode_lint_ignore = "W391,E501,W801"
 
 let g:pymode_doc = 0
 " let g:pymode_doc_key = 'K'
@@ -247,6 +234,104 @@ endfunction
 
 autocmd VimEnter *  call CheckScratch()
 
-if !has("gui_running")
+" Enable syntax highlighting when buffers were loaded through :bufdo, which
+" disables the Syntax autocmd event to speed up processing.
+augroup EnableSyntaxHighlighting
+    " Filetype processing does happen, so we can detect a buffer initially
+    " loaded during :bufdo through a set filetype, but missing b:current_syntax.
+    " Also don't do this when the user explicitly turned off syntax highlighting
+    " via :syntax off.
+    " Note: Must allow nesting of autocmds so that the :syntax enable triggers
+    " the ColorScheme event. Otherwise, some highlighting groups may not be
+    " restored properly.
+    autocmd! BufWinEnter * nested if exists('syntax_on') && ! exists('b:current_syntax') && ! empty(&l:filetype) | syntax enable | endif
+
+    " The above does not handle reloading via :bufdo edit!, because the
+    " b:current_syntax variable is not cleared by that. During the :bufdo,
+    " 'eventignore' contains "Syntax", so this can be used to detect this
+    " situation when the file is re-read into the buffer. Due to the
+    " 'eventignore', an immediate :syntax enable is ignored, but by clearing
+    " b:current_syntax, the above handler will do this when the reloaded buffer
+    " is displayed in a window again.
+    autocmd! BufRead * if exists('syntax_on') && exists('b:current_syntax') && ! empty(&l:filetype) && index(split(&eventignore, ','), 'Syntax') != -1 | unlet! b:current_syntax | endif
+augroup END
+
+"Ghetto Powerline
+let g:last_mode = ""
+
+function! Mode()
+	let l:mode = mode()
+
+	if l:mode !=# g:last_mode "Mode change
+	let g:last_mode = l:mode
+	if     mode ==# "n"  | hi User2 ctermfg=28  ctermbg=22  cterm=bold | hi User3 ctermfg=22  ctermbg=236
+	elseif mode ==# "i"  | hi User2 ctermfg=23  ctermbg=231 cterm=bold | hi User3 ctermfg=231 ctermbg=236
+	elseif mode ==# "R"  | hi User2 ctermfg=231 ctermbg=160 cterm=bold | hi User3 ctermfg=160 ctermbg=236
+	elseif mode ==? "v"  | hi User2 ctermfg=160 ctermbg=208 cterm=bold | hi User3 ctermfg=208 ctermbg=236
+	elseif mode ==# "^V" | hi User2 ctermfg=160 ctermbg=208 cterm=bold | hi User3 ctermfg=208 ctermbg=236
+	endif
+	endif
+
+	if     mode ==# "n"  | return " NORMAL "
+	elseif mode ==# "i"  | return " INSERT "
+	elseif mode ==# "R"  | return " REPLACE "
+	elseif mode ==# "v"  | return " VISUAL "
+	elseif mode ==# "V"  | return " V·LINE "
+	elseif mode ==# "^V" | return " V·BLOCK "
+	else                 | return l:mode
+	endif
+
+	let g:last_mode = l:mode
+endfunc
+
+function! GetBranch()
+	let ret = fugitive#statusline()
+	let ret = substitute(ret, '\c\v\[?GIT\(([a-z0-9\-_\./:]+)\)\]?', '〉⑂' .' \1', 'g')
+	return ret
+endfunction 
+
+function! GetFile()
+	let ret = expand('%:t')
+	if ret == '' || ret == '__Scratch__'
+		let ret = '[Scratch]'
+	elseif ret == 'COMMIT_EDITMSG'
+		let ret = '[Commit Message]'
+	else
+		let ret = ' ⑇ ' . ret
+	endif
+	return ret . ' '
+endfunction 
+
+function! GetStatusFlag()
+	if &ro
+		return 'ø'
+	elseif &mod
+		return '+'
+	else
+		return '-'
+	endif
+endfunction
+
+set laststatus=2 "Always show statusline
+set statusline=\ %{GetStatusFlag()}\ 〉%{Mode()}〉%{GetFile()}%{GetBranch()}%=%{&enc}\ 〈\ %{&ff}\ 〈\ %{tolower(&ft)}
+set statusline+=\ [%03l:%03v\ %03p%%]
+
+
+hi statusline guibg=#FFFFFF guifg=#555555
+
+" Generic
+if has("gui_running")
+	set background=dark
+	colorscheme solarized
+	set lines=40 columns=130
+	set guioptions-=T
+	set guioptions-=m
+else
+	if $TERM == "xterm-256color" || $TERM == "screen-256color" || $COLORTERM == "gnome-terminal" || $TERM == "screen"
+	  set t_Co=256
+	endif
+	colorscheme lucius
+	LuciusBlack
 	hi Normal ctermbg=none
 endif
+

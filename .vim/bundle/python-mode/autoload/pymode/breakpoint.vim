@@ -1,3 +1,4 @@
+" Quick set or delete a breakpoints
 fun! pymode#breakpoint#Set(lnum) "{{{
     let line = getline(a:lnum)
     if strridx(line, g:pymode_breakpoint_cmd) != -1
@@ -8,13 +9,23 @@ fun! pymode#breakpoint#Set(lnum) "{{{
         normal k
     endif
 
-    " Disable lint
-    let pymode_lint = g:pymode_lint
-    let g:pymode_lint = 0
+    " Save file without any events
+    if &modifiable && &modified | noautocmd write | endif	
 
-    " Save file
-    if &modifiable && &modified | write | endif	
+endfunction "}}}
 
-    let g:pymode_lint = pymode_lint
+fun! pymode#breakpoint#SearchDebuger() "{{{
+
+Python << EOF
+from imp import find_module
+
+for module in ('pudb', 'ipdb'):
+    try:
+        find_module(module)
+        vim.command('let g:pymode_breakpoint_cmd = "import %s; %s.set_trace()  # XXX BREAKPOINT"' % (module, module))
+        break
+    except ImportError:
+        continue
+EOF
 
 endfunction "}}}

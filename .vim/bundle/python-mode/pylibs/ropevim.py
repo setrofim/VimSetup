@@ -4,9 +4,9 @@ import os
 import tempfile
 import re
 
-from pylibs.ropemode import decorators
-from pylibs.ropemode import environment
-from pylibs.ropemode import interface
+from ropemode import decorators
+from ropemode import environment
+from ropemode import interface
 
 import vim
 
@@ -268,9 +268,8 @@ class VimUtils(environment.Environment):
 
     def show_doc(self, docs, altview=False):
         if docs:
-            vim.command(
-                'call pymode#ShowStr("{0}")'.format(docs.replace('"', '\\"'))
-            )
+            docs = docs.encode(self._get_encoding()).replace('"', '\\"')
+            vim.command('call pymode#ShowStr("{0}")'.format(docs))
 
     def preview_changes(self, diffs):
         echo(diffs)
@@ -339,8 +338,7 @@ class VimUtils(environment.Environment):
 
         if self.preview and not ci['menu']:
             doc = proposal.get_doc()
-            #ci['info'] = self._docstring_re.match(doc).group(1) if doc else ''
-            ci['menu'] += self._docstring_re.match(doc).group(1) if doc else ''
+            ci['info'] = self._docstring_re.match(doc).group(1) if doc else ''
 
         return self._conv(ci)
 
@@ -381,10 +379,7 @@ class VimProgress(object):
 
 
 def echo(message):
-    if _rope_quiet:
-        return
-    if isinstance(message, unicode):
-        message = message.encode(vim.eval('&encoding'))
+    message = message.encode(VimUtils._get_encoding())
     print message
 
 
@@ -392,8 +387,7 @@ def status(message):
     if _rope_quiet:
         return
 
-    if isinstance(message, unicode):
-        message = message.encode(vim.eval('&encoding'))
+    message = message.encode(VimUtils._get_encoding())
     vim.command('redraw | echon "{0}"'.format(message))
 
 
@@ -446,7 +440,6 @@ class RopeMode(interface.RopeMode):
 
         progress.name = txt
         progress.done()
-        echo('Project opened!')
 
 decorators.logger.message = echo
 decorators.logger.only_short = True
